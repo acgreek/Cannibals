@@ -6,34 +6,34 @@
 
 class Side {
     public:
-        Side(int pm, int pc, bool pboat): m(pm), c(pc), boat(pboat){ }
+        Side(int pm, int pc, bool pboat): m_(pm), c_(pc), boat_(pboat){ }
         bool dead() const{
-            return m > 0 && c > m;
+            return m_ > 0 && c_ > m_;
         }
         bool cannotrow()const {
-            return boat == false ? true : (m + c)==  0;
+            return boat_ == false ? true : (m_ + c_)==  0;
         }
         void print() const{
-            std::cout <<"(" << m << "," << c << "," << boat << ")";
+            std::cout <<"(" << m_ << "," << c_ << "," << boat_ << ")";
         }
         void moveTo(Side & other, int pc, int pm) {
-            c -= pc;
-            m -= pm;
-            boat = false;
-            other.boat = true;
-            other.c+=pc;
-            other.m+= pm;
+            c_ -= pc;
+            m_ -= pm;
+            boat_ = false;
+            other.boat_ = true;
+            other.c_+=pc;
+            other.m_+= pm;
         }
-        int canables() const { return c;}
-        int missionaries() const { return m;}
-        int hasBoat()const  { return boat;}
+        int canables() const { return c_;}
+        int missionaries() const { return m_;}
+        int hasBoat()const  { return boat_;}
         bool operator==(const Side & b)const {
              return canables() == b.canables() && missionaries() == b.missionaries() && hasBoat() == b.hasBoat();
         }
     private:
-        int m;
-        int c;
-        bool boat;
+        int m_;
+        int c_;
+        bool boat_;
 };
 
 class World {
