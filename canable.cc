@@ -4,111 +4,101 @@
 #include <list>
 #include <algorithm>
 
-struct Side {
-    bool dead() {
-        return m > 0 && c > m;
-    }
-    bool cannotrow() {
-        return boat == false ? true : (m + c)==  0;
-    }
-    void print() {
-        std::cout <<"(" << m << "," << c << "," << boat << ")";
-    }
-
-    int m;
-    int c;
-    bool boat;
-};
-struct World {
-    World():left(), right() {
-        left.m =3;
-        left.c =3;
-        left.boat = true;
-        right.m =0;
-        right.c =0;
-        right.boat = false;
-    } ;
-    Side left;
-    Side right;
-    bool done() {
-        return right.m + right.c == 6;
-    }
-    bool dead() {
-        return right.dead() || left.dead();
-    }
-    bool cannotrow() {
-        return right.cannotrow() &&  left.cannotrow();
-    }
-    void print() {
-        left.print();
-        std::cout <<" ";
-        right.print() ;
-        std::cout <<std::endl;
-    }
-};
-bool operator==(const Side & a, const Side & b) {
-    return a.c == b.c && a.m == b.m && a.boat == b.boat;
-}
-bool operator==(const World & a, const World & b) {
-    return a.left == b.left && a.right == b.right;
-}
-
-World move(World w, int c, int m) {
-    if (w.left.boat) {
-        w.left.c -= c;
-        w.left.m -= m;
-        w.left.boat = false;
-        w.right.boat = true;
-        w.right.c+=c;
-        w.right.m+= m;
-    }
-    else {
-        w.right.c-= c;
-        w.right.m -= m;
-        w.right.boat = false;
-        w.left.boat = true;
-        w.left.c+=c;
-        w.left.m+= m;
-    }
-    return w;
-}
-
-bool solve(World w, std::list<World> &history) {
-    if (std::find(history.begin(), history.end(), w)  != history.end())
-        return false;
-    history.push_back(w);
-    if (w.done()) {
-        w.print();
-        return true;
-    }
-    if (w.dead() || w.cannotrow())
-        return false;
-    if (w.left.boat) {
-        if ((w.left.c > 1 && solve(move(w,2,0) , history)) ||
-            (w.left.c > 0 && w.left.m > 0 && solve(move(w,1,1) , history)) ||
-            (w.left.m > 1 && solve(move(w,0,2) , history)) ||
-            (w.left.m > 0 && solve(move(w,0,1) , history)) ||
-            (w.left.c > 0 && solve(move(w,1,0) , history))
-            ) {
-            w.print();
-            return true;
+class Side {
+    public:
+        Side(int pm, int pc, bool pboat): m(pm), c(pc), boat(pboat){ }
+        bool dead() const{
+            return m > 0 && c > m;
         }
-    } else {
-        if ((w.right.c > 1 && solve(move(w,2,0) , history)) ||
-            (w.right.c > 0 && w.right.m > 0 && solve(move(w,1,1) , history)) ||
-            (w.right.m > 1 && solve(move(w,0,2) , history)) ||
-            (w.right.m > 0 && solve(move(w,0,1) , history))||
-            (w.right.c > 0 && solve(move(w,1,0) , history)) ) {
-            w.print();
-            return true;
+        bool cannotrow()const {
+            return boat == false ? true : (m + c)==  0;
         }
-    }
-    return false;
-}
+        void print() const{
+            std::cout <<"(" << m << "," << c << "," << boat << ")";
+        }
+        void moveTo(Side & other, int pc, int pm) {
+            c -= pc;
+            m -= pm;
+            boat = false;
+            other.boat = true;
+            other.c+=pc;
+            other.m+= pm;
+        }
+        int canables() const { return c;}
+        int missionaries() const { return m;}
+        int hasBoat()const  { return boat;}
+        bool operator==(const Side & b)const {
+             return canables() == b.canables() && missionaries() == b.missionaries() && hasBoat() == b.hasBoat();
+        }
+    private:
+        int m;
+        int c;
+        bool boat;
+};
+
+class World {
+    public:
+        World():left(3,3,true), right(0,0,false) { } ;
+        bool done()const  {
+            return right.missionaries() + right.canables() == 6;
+        }
+        bool dead() const{
+            return right.dead() || left.dead();
+        }
+        bool cannotrow()const {
+            return right.cannotrow() &&  left.cannotrow();
+        }
+        void print() const{
+            left.print();
+            std::cout <<" ";
+            right.print() ;
+            std::cout <<std::endl;
+        }
+        World move(int c, int m) const {
+            World nw = *this;
+            if (nw.left.hasBoat()) {
+                nw.left.moveTo(nw.right, c,m);
+            }
+            else {
+                nw.right.moveTo(nw.left,c,m);
+            }
+            return nw;
+        }
+        bool operator==(const World & b) {
+            return left == b.left && right == b.right;
+        }
+        bool solve(std::list<World> &history) const {
+            if (std::find(history.begin(), history.end(), *this)  != history.end())
+                return false;
+            history.push_back(*this);
+            if (done()) {
+                print();
+                return true;
+            }
+            if (dead() || cannotrow())
+                return false;
+            if (solveSide(left.hasBoat() ? left : right,history)) {
+                print();
+                return true;
+            }
+            return false;
+        }
+    private:
+        bool solveSide(const Side & side,std::list<World> &history) const {
+            return ((side.canables() > 1 && move(2,0) .solve( history)) ||
+                    (side.canables() > 0 && side.missionaries() > 0 && move(1,1).solve( history)) ||
+                    (side.missionaries() > 1 && move(0,2).solve( history)) ||
+                    (side.missionaries() > 0 && move(0,1).solve(history))||
+                    (side.canables() > 0 && move(1,0).solve( history)) );
+
+        }
+        Side left;
+        Side right;
+};
 
 int main () {
     std::list<World> history;
     World w;
-    std::cout << "found a solution " << solve(w, history) << std::endl;
+    std::cout << "found a solution " << w. solve(history) << std::endl;
     return 0;
 }
