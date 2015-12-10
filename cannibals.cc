@@ -16,7 +16,15 @@ class Side {
             return boat_ == false ? true : (missionaries_ + gorillas_)==  0;
         }
         void print() const{
-            std::cout <<"(" << missionaries_ << "," << gorillas_ << "," <<  monkeys_ << ","<< boat_ << ")";
+            //std::cout <<"(missionaries=" << missionaries_ << ",aps=" << gorillas_ << ",monkeys=" <<  monkeys_ << ",has boat="<< (boat_? "true ":"false") << ")";
+            std::cout <<"(";
+            for(int i=0; i < missionaries_;i++)
+                std::cout <<"M";
+            for(int i=0; i < gorillas_;i++)
+                std::cout <<"a";
+            for(int i=0; i < monkeys_;i++)
+                std::cout <<"m";
+            std::cout << ")" << (boat_ ? "b" : "") << " ";
         }
         void moveTo(Side & other, int pc, int pm, int n) {
             gorillas_ -= pc;
@@ -129,8 +137,8 @@ int main (int argc, char * argv[]) {
                 }
                 break;
             case 'a': apes = atoi(optarg);break;
-            case 'm': missionaries = atoi(optarg);break;
-            case 'M': monkeys= atoi(optarg);break;
+            case 'M': missionaries = atoi(optarg);break;
+            case 'm': monkeys= atoi(optarg);break;
         }
     }
     std::list<World> history;
