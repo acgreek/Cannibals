@@ -1,10 +1,10 @@
 CXXFLAGS= -ggdb -Wall -Weffc++
-all: canable
+all: cannibals
 	
-canable: canable.cc
+canable: cannibals.cc
 
-run: canable
-	./canable
+run: cannibals
+	./cannibals
 
 .PHONY: run
 	
