@@ -4,7 +4,8 @@
 #include <list>
 #include <algorithm>
 #include <stdlib.h>
-#include <getopt.h>
+#include "options.h"
+
 
 class Side {
     public:
@@ -114,35 +115,10 @@ class World {
 };
 
 int main (int argc, char * argv[]) {
-
-    int apes=1, missionaries=3, monkeys=2;
-    while (1)  {
-        static struct option long_options[] = {
-            {"apes",     required_argument, 0,  0 },
-            {"missionaries",  required_argument, 0,  0 },
-            {"monkeys", required_argument,       0,  0 },
-            {0,         0,                 0,  0 }
-        };
-        int option_index = 0;
-        char c = getopt_long(argc, argv, "a:m:M:", long_options, &option_index);
-        if (c == -1)
-            break;
-
-        switch (c) {
-            case 0:
-                switch(option_index ) {
-                    case 0: apes = atoi(optarg);break;
-                    case 1: missionaries = atoi(optarg);break;
-                    case 2: monkeys= atoi(optarg);break;
-                }
-                break;
-            case 'a': apes = atoi(optarg);break;
-            case 'M': missionaries = atoi(optarg);break;
-            case 'm': monkeys= atoi(optarg);break;
-        }
-    }
+	Options opt;
+	readOptions(opt, argc, argv);
     std::list<World> history;
-    World w(apes,monkeys, missionaries);
-    std::cout << "found a solution " << w. solve(history) << std::endl;
+    World w(opt.apes,opt.monkeys, opt.missionaries);
+    std::cout << "found a solution " << w.solve(history) << std::endl;
     return 0;
 }
